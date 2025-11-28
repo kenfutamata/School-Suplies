@@ -16,15 +16,15 @@ class DashboardController extends Controller
     public function index()
     {
         $seller = auth()->user()->seller;
-        
+
         $totalProducts = $seller->products()->count();
         $pendingOrders = Order::whereHas('items.product', function ($query) use ($seller) {
             $query->where('seller_id', $seller->id);
         })->where('status', 'pending')->count();
-        
+
         $totalRevenue = Order::whereHas('items.product', function ($query) use ($seller) {
             $query->where('seller_id', $seller->id);
-        })->where('status', '!=', 'cancelled')->sum('total_amount');
+        })->where('status', 'Delivered')->sum('total_amount');
 
         $recentOrders = Order::whereHas('items.product', function ($query) use ($seller) {
             $query->where('seller_id', $seller->id);

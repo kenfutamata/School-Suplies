@@ -26,7 +26,7 @@ class DashboardController extends Controller
             'pending_products' => Product::where('is_approved', false)->count(),
             'total_orders' => Order::count(),
             'pending_orders' => Order::where('status', 'pending')->count(),
-            'total_revenue' => Order::where('status', '!=', 'cancelled')->sum('total_amount'),
+            'total_revenue' => Order::where('status', 'Delivered')->sum('total_amount'),
         ];
 
         $recentOrders = Order::with(['user', 'items.product'])->latest()->take(5)->get();

@@ -79,7 +79,14 @@ class CheckoutController extends Controller
                 'status' => 'pending',
                 'amount' => $total,
             ]);
-
+            $orderNumber = $order->order_number;
+            $mailData = [
+                'order' => $order,
+                'name'=> $user->name,
+                'items'=> $cartItems,   
+                'order_number'=> $orderNumber
+            ];
+            Mail::to($user->email)->send(new sendOrderDetailsMail($mailData));
             auth()->user()->cartItems()->delete();
             return redirect()->route('customer.orders.index')->with('success', 'Order created successfully');
         } catch (\Exception $e) {

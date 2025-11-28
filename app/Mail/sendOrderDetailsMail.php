@@ -28,7 +28,7 @@ class sendOrderDetailsMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Order has been placed',
+            subject: 'Your Order has been placed. Your order number will be '.$this->maildata['order_number'],
         );
     }
 

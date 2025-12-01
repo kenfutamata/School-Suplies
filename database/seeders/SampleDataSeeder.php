@@ -70,6 +70,7 @@ class SampleDataSeeder extends Seeder
             $createdProducts[] = $seller->products()->updateOrCreate(
                 ['name' => $productData['name']],
                 array_merge($productData, [
+                    'status' => Product::STATUS_APPROVED,
                     'is_approved' => true,
                     'is_active' => true,
                 ])

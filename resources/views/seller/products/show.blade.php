@@ -27,18 +27,22 @@
       <div class="bg-secondary rounded" style="height: 400px;"></div>
     @endif
   </div>
-  
+
   <div class="col-md-6">
     <div class="bg-white p-4 rounded shadow-sm">
       <h2>{{ $product->name }}</h2>
       <p class="text-muted">Price: ₱{{ number_format($product->price, 2) }}</p>
       <p class="text-muted">Stock: {{ $product->stock }}</p>
-      <p class="text-muted">Status: 
-        @if($product->is_approved)
-          <span class="badge bg-success">Approved</span>
-        @else
-          <span class="badge bg-warning">Pending Approval</span>
-        @endif
+      <p class="text-muted">Status:
+        @php
+          $statusColors = [
+            \App\Models\Product::STATUS_APPROVED => 'success',
+            \App\Models\Product::STATUS_PENDING => 'warning',
+            \App\Models\Product::STATUS_DENIED => 'danger',
+          ];
+          $badge = $statusColors[$product->status] ?? 'secondary';
+        @endphp
+        <span class="badge bg-{{ $badge }}">{{ ucfirst($product->status ?? 'pending') }}</span>
       </p>
       <p>{{ $product->description }}</p>
       <div class="d-flex gap-2">

@@ -120,10 +120,10 @@
                                             <i class="bi bi-check-circle me-1"></i>Approve
                                         </button>
                                     </form>
-                                    <form action="{{ route('admin.products.reject', $product) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to reject this product? This will deactivate it and notify the seller.">
+                                    <form action="{{ route('admin.products.reject', $product) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to deny this product? This will deactivate it and notify the seller.">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-x-circle me-1"></i>Reject
+                                            <i class="bi bi-x-circle me-1"></i>Deny
                                         </button>
                                     </form>
                                 </td>

@@ -2,6 +2,15 @@
 
 @section('title', 'Home - School Supplies')
 
+<style>
+  .carousel-item img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    max-height: 350px;
+  }
+</style>
+
 @section('content')
 <div class="row mb-4">
   <div class="col-lg-8">
@@ -11,10 +20,10 @@
       <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
           <div class="carousel-item active">
-            <img src="/images/hero-1.jpg" class="d-block w-100 rounded" alt="hero">
+            <img src="/images/Logo.png" class="d-block w-100 rounded" alt="hero">
           </div>
           <div class="carousel-item">
-            <img src="/images/hero-2.jpg" class="d-block w-100 rounded" alt="hero">
+            <img src="/images/Logo.png" class="d-block w-100 rounded" alt="hero">
           </div>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>

@@ -15,6 +15,7 @@
             <div class="mb-3">
                 <a href="?status=pending" class="btn btn-warning">Pending Approval</a>
                 <a href="?status=approved" class="btn btn-success">Approved</a>
+                <a href="?status=denied" class="btn btn-danger">Denied</a>
                 <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">All Products</a>
             </div>
             <div class="table-responsive">
@@ -37,21 +38,26 @@
                                 <td>₱{{ number_format($product->price, 2) }}</td>
                                 <td>{{ $product->stock }}</td>
                                 <td>
-                                    @if($product->is_approved)
-                                        <span class="badge bg-success">Approved</span>
-                                    @else
-                                        <span class="badge bg-warning">Pending</span>
-                                    @endif
+                                    @php
+                                        $status = $product->status ?? \App\Models\Product::STATUS_PENDING;
+                                        $statusColors = [
+                                            \App\Models\Product::STATUS_APPROVED => 'success',
+                                            \App\Models\Product::STATUS_PENDING => 'warning',
+                                            \App\Models\Product::STATUS_DENIED => 'danger',
+                                        ];
+                                        $badgeClass = $statusColors[$status] ?? 'secondary';
+                                    @endphp
+                                    <span class="badge bg-{{ $badgeClass }}">{{ ucfirst($status) }}</span>
                                 </td>
                                 <td>
-                                    @if(!$product->is_approved)
+                                    @if($product->status === \App\Models\Product::STATUS_PENDING)
                                         <form action="{{ route('admin.products.approve', $product) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to approve this product? It will be visible to customers.">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success">Approve</button>
                                         </form>
-                                        <form action="{{ route('admin.products.reject', $product) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to reject this product? This will deactivate it and notify the seller.">
+                                        <form action="{{ route('admin.products.reject', $product) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to deny this product? This will deactivate it and notify the seller.">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                            <button type="submit" class="btn btn-sm btn-danger">Deny</button>
                                         </form>
                                     @endif
                                     <form action="{{ route('admin.products.destroy', $product) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this product? This action cannot be undone.">

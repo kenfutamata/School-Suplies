@@ -41,10 +41,11 @@ class ProductController extends Controller
 
         $seller = auth()->user()->seller;
 
-        // Auto-approve products so customers can see them immediately
-        $validated['is_approved'] = true;
+        // New products must be reviewed by admins first
+        $validated['status'] = Product::STATUS_PENDING;
+        $validated['is_approved'] = false;
         $validated['is_active'] = true;
-        
+
         $product = $seller->products()->create($validated);
 
         // Handle image uploads
@@ -60,7 +61,9 @@ class ProductController extends Controller
             }
         }
 
-        return redirect()->route('seller.products.index')->with('success', 'Product created successfully');
+        return redirect()
+            ->route('seller.products.index')
+            ->with('success', 'Product submitted for review. We\'ll notify you once it\'s approved.');
     }
 
     public function show(Product $product)

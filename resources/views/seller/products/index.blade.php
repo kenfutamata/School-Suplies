@@ -48,11 +48,15 @@
                 <td>₱{{ number_format($product->price, 2) }}</td>
                 <td>{{ $product->stock }}</td>
                 <td>
-                  @if($product->is_approved)
-                    <span class="badge bg-success">Approved</span>
-                  @else
-                    <span class="badge bg-warning">Pending</span>
-                  @endif
+                  @php
+                    $statusColors = [
+                      \App\Models\Product::STATUS_APPROVED => 'success',
+                      \App\Models\Product::STATUS_PENDING => 'warning',
+                      \App\Models\Product::STATUS_DENIED => 'danger',
+                    ];
+                    $badge = $statusColors[$product->status] ?? 'secondary';
+                  @endphp
+                  <span class="badge bg-{{ $badge }}">{{ ucfirst($product->status ?? 'pending') }}</span>
                 </td>
                 <td>
                   <a href="{{ route('seller.products.edit', $product) }}" class="btn btn-sm btn-outline-primary">Edit</a>

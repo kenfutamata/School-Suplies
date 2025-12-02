@@ -23,14 +23,14 @@ class DashboardController extends Controller
             'sellers' => User::where('role', 'seller')->count(),
             'admins' => User::where('role', 'admin')->count(),
             'total_products' => Product::count(),
-            'pending_products' => Product::where('is_approved', false)->count(),
+            'pending_products' => Product::where('status', "pending")->count(),
             'total_orders' => Order::count(),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'total_revenue' => Order::where('status', 'Delivered')->sum('total_amount'),
         ];
 
         $recentOrders = Order::with(['user', 'items.product'])->latest()->take(5)->get();
-        $pendingProducts = Product::where('is_approved', false)->with('seller.user')->latest()->take(5)->get();
+        $pendingProducts = Product::where('is_approved', false)->where('status', 'pending')->with('seller.user')->latest()->take(5)->get();
 
         return view('admin.dashboard', compact('stats', 'recentOrders', 'pendingProducts'));
     }

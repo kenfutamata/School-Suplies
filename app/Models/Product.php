@@ -23,6 +23,7 @@ class Product extends Model
         'variant',
         'is_approved',
         'is_active',
+        'status'
     ];
 
     protected $casts = [

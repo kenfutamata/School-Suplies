@@ -33,7 +33,7 @@ class ProductController extends Controller
 
     public function approve(Product $product)
     {
-        $product->update(['is_approved' => true]);
+        $product->update(['is_approved' => true, 'status' => Product::STATUS_APPROVED]);
 
         // Notify seller
         $product->seller->user->notifications()->create([
@@ -49,7 +49,7 @@ class ProductController extends Controller
 
     public function reject(Product $product)
     {
-        $product->update(['is_approved' => false, 'is_active' => false]);
+        $product->update(['is_approved' => false, 'is_active' => false, 'status' => Product::STATUS_REJECTED]);
         return back()->with('success', 'Product rejected');
     }
 

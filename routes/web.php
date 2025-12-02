@@ -38,21 +38,21 @@ Route::get('/dashboard', function () {
 // Customer routes
 Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
-    
+
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/{product}', [CartController::class, 'store'])->name('cart.store');
     Route::put('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');
-    
+
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/{product}', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('/wishlist/{product}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
-    
+
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/payment/{order}', [CheckoutController::class, 'payment'])->name('checkout.payment');
     Route::post('/checkout/payment/{order}', [CheckoutController::class, 'processPayment'])->name('checkout.process-payment');
-    
+
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
 });
@@ -60,9 +60,9 @@ Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->
 // Seller routes
 Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
-    
+
     Route::resource('products', SellerProductController::class);
-    
+
     Route::get('/orders', [SellerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [SellerOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/status', [SellerOrderController::class, 'updateStatus'])->name('orders.update-status');
@@ -71,14 +71,14 @@ Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(
 // Admin routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    
+
     Route::resource('users', UserController::class);
-    
+
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::post('/products/{product}/approve', [AdminProductController::class, 'approve'])->name('products.approve');
     Route::post('/products/{product}/reject', [AdminProductController::class, 'reject'])->name('products.reject');
     Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])->name('products.destroy');
-    
+
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');

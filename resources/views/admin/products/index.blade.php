@@ -4,7 +4,7 @@
 
 @section('content')
             <h1 class="mb-4">Products Management</h1>
-            
+
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
@@ -43,7 +43,7 @@
                                         $statusColors = [
                                             \App\Models\Product::STATUS_APPROVED => 'success',
                                             \App\Models\Product::STATUS_PENDING => 'warning',
-                                            \App\Models\Product::STATUS_DENIED => 'danger',
+                                            \App\Models\Product::STATUS_REJECTED => 'danger', {{-- FIXED --}}
                                         ];
                                         $badgeClass = $statusColors[$status] ?? 'secondary';
                                     @endphp
@@ -77,6 +77,3 @@
             </div>
             {{ $products->links() }}
 @endsection
-
-
-

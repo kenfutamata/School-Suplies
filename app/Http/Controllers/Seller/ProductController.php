@@ -42,7 +42,7 @@ class ProductController extends Controller
         $seller = auth()->user()->seller;
 
         // New products must be reviewed by admins first
-        $validated['status'] = Product::STATUS_PENDING;
+        //$validated['status'] = Product::STATUS_PENDING;
         $validated['is_approved'] = false;
         $validated['is_active'] = true;
 

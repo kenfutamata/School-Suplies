@@ -14,20 +14,22 @@ class ProductController extends Controller
     }
 
     public function index(Request $request)
-    {
-        $query = Product::with(['seller.user', 'images']);
+{
+    $query = Product::with(['seller.user', 'images'])
+                    ->where('is_active', true); // only active products
 
-        if ($request->has('status')) {
-            if ($request->status === 'pending') {
-                $query->where('is_approved', false);
-            } elseif ($request->status === 'approved') {
-                $query->where('is_approved', true);
-            }
+    if ($request->has('status')) {
+        if ($request->status === 'pending') {
+            $query->where('is_approved', false);
+        } elseif ($request->status === 'approved') {
+            $query->where('is_approved', true);
         }
-
-        $products = $query->latest()->paginate(15);
-        return view('admin.products.index', compact('products'));
     }
+
+    $products = $query->latest()->paginate(15);
+    return view('admin.products.index', compact('products'));
+}
+
 
     public function approve(Product $product)
     {

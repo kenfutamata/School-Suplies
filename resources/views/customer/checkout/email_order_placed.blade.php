@@ -62,7 +62,7 @@
                                                             <li>{{$item->product->name}} - Quantity: {{$item->quantity}} - Price: ${{$item->product->price}}</li>
                                                             @endforeach
                                                         </ul>
-                                                        <p>Total Amount: ${{$maildata['order']->amount}}</p>
+                                                        <p>Total Amount: ${{$maildata['total']}}</p>
                                                     </td>
                                                 </tr>
                                                 <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">

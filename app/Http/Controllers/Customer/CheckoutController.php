@@ -83,8 +83,9 @@ class CheckoutController extends Controller
             $mailData = [
                 'order' => $order,
                 'name'=> $user->name,
-                'items'=> $cartItems,   
-                'order_number'=> $orderNumber
+                'items'=> $cartItems,
+                'order_number'=> $orderNumber,
+                'total'=> $total,
             ];
             Mail::to($user->email)->send(new sendOrderDetailsMail($mailData));
             auth()->user()->cartItems()->delete();

@@ -18,7 +18,11 @@
     @endif
 
     @php
-      $products = auth()->user()->seller->products()->with('images')->latest()->get();
+      $products = auth()->user()->seller->products()
+                ->with('images')
+                //where('is_active', true)  // only active products
+                ->latest()
+                ->get();
     @endphp
 
     <div class="row">
@@ -48,11 +52,11 @@
                 <td>₱{{ number_format($product->price, 2) }}</td>
                 <td>{{ $product->stock }}</td>
                 <td>
-                  @php
+                 @php
                     $statusColors = [
                       \App\Models\Product::STATUS_APPROVED => 'success',
                       \App\Models\Product::STATUS_PENDING => 'warning',
-                      \App\Models\Product::STATUS_DENIED => 'danger',
+                      \App\Models\Product::STATUS_REJECTED => 'danger',
                     ];
                     $badge = $statusColors[$product->status] ?? 'secondary';
                   @endphp

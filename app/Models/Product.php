@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory;
+    // add constants - minimal, safe fix
+    const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
 
     protected $fillable = [
         'seller_id',
@@ -55,5 +59,18 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function getStatusAttribute()
+{
+    if ($this->is_approved === true) {
+        return self::STATUS_APPROVED;
+    }
+
+    if ($this->is_approved === false && $this->is_active === false) {
+        return self::STATUS_REJECTED;
+    }
+
+    return self::STATUS_PENDING;
     }
 }

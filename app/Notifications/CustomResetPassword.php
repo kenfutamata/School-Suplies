@@ -47,9 +47,9 @@ class CustomResetPassword extends Notification
         ], false));
 
         return (new MailMessage)
-            ->subject('Laravel_App Password Reset')
-            ->greeting('Roamar, Kaycee!')
-            ->line('Ni notify mis email nimo para sa forgot password.')
+            ->subject('School_Supplies_Backup Password Reset')
+            ->greeting('Hello!')
+            ->line('forgot password.')
             ->action('Reset Password', $url)
             ->line('Mawagtang ni sud sa  10 minutes.')
             ->line('If you did not request a password reset, no further action is required.')

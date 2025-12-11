@@ -26,10 +26,29 @@
       <input class="form-control @error('stock') is-invalid @enderror" name="stock" type="number" value="{{ old('stock') }}" required>
       @error('stock')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
+
+    {{-- ⭐ Category dropdown with “Other” input --}}
     <div class="mb-3">
       <label class="form-label">Category</label>
-      <input class="form-control" name="category" value="{{ old('category') }}">
+      <select class="form-control" name="category" id="categorySelect">
+          <option value="">Select category</option>
+          <option value="Notebooks" {{ old('category') == 'Notebooks' ? 'selected' : '' }}>Notebooks</option>
+          <option value="Pens & Pencils" {{ old('category') == 'Pens & Pencils' ? 'selected' : '' }}>Pens & Pencils</option>
+          <option value="Art Supplies" {{ old('category') == 'Art Supplies' ? 'selected' : '' }}>Art Supplies</option>
+          <option value="Bag" {{ old('category') == 'Bag' ? 'selected' : '' }}>Bag</option>
+          <option value="Other" {{ old('category') == 'Other' ? 'selected' : '' }}>Other</option>
+      </select>
+
+      <input
+        class="form-control mt-2"
+        name="category_other"
+        id="categoryOtherInput"
+        placeholder="Enter category"
+        style="display: none;"
+        value="{{ old('category_other') }}"
+      >
     </div>
+
     <div class="mb-3">
       <label class="form-label">Variant</label>
       <input class="form-control" name="variant" value="{{ old('variant') }}">
@@ -46,5 +65,25 @@
     </div>
   </form>
 </div>
-@endsection
 
+{{-- ⭐ JavaScript to show/hide "Other" input --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const select = document.getElementById('categorySelect');
+    const otherInput = document.getElementById('categoryOtherInput');
+
+    function toggleOtherInput() {
+        if (select.value === 'Other') {
+            otherInput.style.display = 'block';
+        } else {
+            otherInput.style.display = 'none';
+            otherInput.value = '';
+        }
+    }
+
+    toggleOtherInput();
+    select.addEventListener('change', toggleOtherInput);
+});
+</script>
+
+@endsection

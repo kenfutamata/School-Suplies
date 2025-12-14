@@ -3,6 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="csrf-token" content="{{ csrf_token() }}">
 	<title>@yield('title', 'School Supplies Store')</title>
 	<!-- Bootstrap 5 CSS -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -51,6 +52,9 @@
 	    document.addEventListener('submit', function(e){
 	        const form = e.target;
 	        if (!(form instanceof HTMLFormElement)) return;
+	        
+	        // Skip GET forms - they don't need confirmation
+	        if (form.method.toLowerCase() === 'get') return;
 	        
 	        // Check for method override (DELETE, PUT, PATCH)
 	        const methodInput = form.querySelector('input[name="_method"]');

@@ -26,6 +26,7 @@ class User extends Authenticatable
         'role',
         'phone',
         'shipping_address',
+        'password_reset_at',
     ];
 
     /**
@@ -48,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'password_reset_at' => 'datetime',
         ];
     }
 

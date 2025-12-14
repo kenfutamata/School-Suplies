@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -40,6 +42,23 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+
+        // Check if user exists and if password was reset
+        $user = User::where('email', $this->input('email'))->first();
+        
+        if ($user) {
+            // Check if password was reset and provided password doesn't match
+            if ($user->password_reset_at && !Hash::check($this->input('password'), $user->password)) {
+                RateLimiter::hit($this->throttleKey());
+
+                // Format the reset timestamp dynamically
+                $resetDateTime = $user->password_reset_at->format('F d, Y \a\t g:i A');
+                
+                throw ValidationException::withMessages([
+                    'email' => "Your password has been reset on {$resetDateTime}. Please use your new password to login.",
+                ]);
+            }
+        }
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());

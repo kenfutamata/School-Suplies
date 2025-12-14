@@ -17,12 +17,11 @@ class OrderController extends Controller
     {
         $seller = auth()->user()->seller;
         
-        $orders = Order::whereHas('items.product', function ($query) use ($seller) {
-            $query->where('seller_id', $seller->id);
-        })
-        ->with(['items.product', 'user'])
-        ->latest()
-        ->paginate(10);
+        // Get orders that belong to this seller (using seller_id)
+        $orders = Order::where('seller_id', $seller->id)
+            ->with(['items.product', 'user'])
+            ->latest()
+            ->paginate(10);
 
         return view('seller.orders.index', compact('orders'));
     }
@@ -31,11 +30,8 @@ class OrderController extends Controller
     {
         $seller = auth()->user()->seller;
         
-        $hasSellerProducts = $order->items->contains(function ($item) use ($seller) {
-            return $item->product->seller_id === $seller->id;
-        });
-
-        if (!$hasSellerProducts) {
+        // Verify the order belongs to this seller
+        if ($order->seller_id !== $seller->id) {
             abort(403);
         }
 
@@ -47,11 +43,8 @@ class OrderController extends Controller
     {
         $seller = auth()->user()->seller;
         
-        $hasSellerProducts = $order->items->contains(function ($item) use ($seller) {
-            return $item->product->seller_id === $seller->id;
-        });
-
-        if (!$hasSellerProducts) {
+        // Verify the order belongs to this seller
+        if ($order->seller_id !== $seller->id) {
             abort(403);
         }
 

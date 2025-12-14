@@ -12,6 +12,7 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'user_id',
+        'seller_id',
         'total_amount',
         'status',
         'shipping_address',
@@ -33,6 +34,11 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
     }
 
     public function items()

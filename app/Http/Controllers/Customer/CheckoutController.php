@@ -16,80 +16,148 @@ use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $cartItems = auth()->user()->cartItems()->with('product')->get();
-
-        if ($cartItems->isEmpty()) {
-            return redirect()->route('customer.cart.index')->with('error', 'Your cart is empty');
+        // Get selected cart item IDs from the request
+        $selectedItemIds = $request->input('selected_items', []);
+        
+        if (empty($selectedItemIds)) {
+            return redirect()->route('customer.cart.index')->with('error', 'Please select at least one item to checkout');
         }
 
+        // Get only the selected cart items
+        $cartItems = auth()->user()->cartItems()
+            ->whereIn('id', $selectedItemIds)
+            ->with('product.seller')
+            ->get();
+
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('customer.cart.index')->with('error', 'Selected items not found');
+        }
+
+        // Validate ownership
+        foreach ($cartItems as $item) {
+            if ($item->user_id !== auth()->id()) {
+                return redirect()->route('customer.cart.index')->with('error', 'Unauthorized access to cart items');
+            }
+        }
+
+        // Calculate total
         $total = $cartItems->sum(function ($item) {
             return $item->product->price * $item->quantity;
         });
 
-        return view('customer.checkout.index', compact('cartItems', 'total'));
+        // Group items by seller for display
+        $itemsBySeller = $cartItems->groupBy('product.seller_id');
+
+        return view('customer.checkout.index', compact('cartItems', 'total', 'itemsBySeller', 'selectedItemIds'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'selected_items' => 'required|array',
+            'selected_items.*' => 'exists:cart_items,id',
             'shipping_address' => 'required|string',
             'shipping_latitude' => 'nullable|string',
             'shipping_longitude' => 'nullable|string',
             'payment_method' => 'required|in:gcash,card',
         ]);
 
-        $cartItems = auth()->user()->cartItems()->with('product')->get();
+        $selectedItemIds = $request->input('selected_items');
         $user = auth()->user();
+
+        // Get only the selected cart items
+        $cartItems = $user->cartItems()
+            ->whereIn('id', $selectedItemIds)
+            ->with('product.seller')
+            ->get();
+
         if ($cartItems->isEmpty()) {
-            return redirect()->route('customer.cart.index')->with('error', 'Your cart is empty');
+            return redirect()->route('customer.cart.index')->with('error', 'Selected items not found');
         }
 
-        $total = $cartItems->sum(function ($item) {
-            return $item->product->price * $item->quantity;
-        });
+        // Validate ownership and availability
+        foreach ($cartItems as $cartItem) {
+            if ($cartItem->user_id !== auth()->id()) {
+                return redirect()->route('customer.cart.index')->with('error', 'Unauthorized access to cart items');
+            }
+            if ($cartItem->quantity > $cartItem->product->stock) {
+                return redirect()->route('customer.cart.index')->with('error', "Insufficient stock for {$cartItem->product->name}");
+            }
+        }
 
         try {
-            $order = Order::create([
-                'order_number' => 'ORD-' . strtoupper(Str::random(8)),
-                'user_id' => auth()->id(),
-                'total_amount' => $total,
-                'status' => 'pending',
-                'shipping_address' => $request->shipping_address,
-                'shipping_latitude' => $request->shipping_latitude,
-                'shipping_longitude' => $request->shipping_longitude,
-            ]);
+            // Group cart items by seller_id
+            $itemsBySeller = $cartItems->groupBy('product.seller_id');
+            $createdOrders = collect([]);
 
-            foreach ($cartItems as $cartItem) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $cartItem->product_id,
-                    'quantity' => $cartItem->quantity,
-                    'price' => $cartItem->product->price,
-                    'subtotal' => $cartItem->product->price * $cartItem->quantity,
+            // Create one order per seller
+            foreach ($itemsBySeller as $sellerId => $sellerItems) {
+                // Calculate total for this seller's items
+                $sellerTotal = $sellerItems->sum(function ($item) {
+                    return $item->product->price * $item->quantity;
+                });
+
+                // Create order for this seller
+                $order = Order::create([
+                    'order_number' => 'ORD-' . strtoupper(Str::random(8)),
+                    'user_id' => auth()->id(),
+                    'seller_id' => $sellerId,
+                    'total_amount' => $sellerTotal,
+                    'status' => 'pending',
+                    'shipping_address' => $request->shipping_address,
+                    'shipping_latitude' => $request->shipping_latitude,
+                    'shipping_longitude' => $request->shipping_longitude,
                 ]);
 
-                $cartItem->product->decrement('stock', $cartItem->quantity);
+                // Create order items for this seller
+                foreach ($sellerItems as $cartItem) {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $cartItem->product_id,
+                        'quantity' => $cartItem->quantity,
+                        'price' => $cartItem->product->price,
+                        'subtotal' => $cartItem->product->price * $cartItem->quantity,
+                    ]);
+
+                    // Decrement stock
+                    $cartItem->product->decrement('stock', $cartItem->quantity);
+                }
+
+                // Create payment for this order
+                Payment::create([
+                    'order_id' => $order->id,
+                    'method' => $request->payment_method,
+                    'status' => 'pending',
+                    'amount' => $sellerTotal,
+                ]);
+
+                $createdOrders->push($order);
             }
 
-            Payment::create([
-                'order_id' => $order->id,
-                'method' => $request->payment_method,
-                'status' => 'pending',
-                'amount' => $total,
-            ]);
-            $orderNumber = $order->order_number;
-            $mailData = [
-                'order' => $order,
-                'name'=> $user->name,
-                'items'=> $cartItems,
-                'order_number'=> $orderNumber,
-                'total'=> $total,
-            ];
-            Mail::to($user->email)->send(new sendOrderDetailsMail($mailData));
-            auth()->user()->cartItems()->delete();
-            return redirect()->route('customer.orders.index')->with('success', 'Order created successfully');
+            // Send email for each order separately
+            foreach ($createdOrders as $order) {
+                $orderItems = $order->items()->with('product')->get();
+                $mailData = [
+                    'order' => $order,
+                    'order_number' => $order->order_number,
+                    'name' => $user->name,
+                    'items' => $orderItems,
+                    'total' => $order->total_amount,
+                ];
+                Mail::to($user->email)->send(new sendOrderDetailsMail($mailData));
+            }
+
+            // Remove only the selected cart items
+            CartItem::whereIn('id', $selectedItemIds)->delete();
+
+            $orderCount = count($createdOrders);
+            $message = $orderCount > 1 
+                ? "{$orderCount} orders created successfully" 
+                : "Order created successfully";
+
+            return redirect()->route('customer.orders.index')->with('success', $message);
         } catch (\Exception $e) {
             Log::error('Checkout Error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'An error occurred while processing your order: ' . $e->getMessage());

@@ -6,6 +6,12 @@
 <h1 class="mb-4">Checkout</h1>
 <form action="{{ route('customer.checkout.store') }}" method="POST">
     @csrf
+    
+    {{-- Hidden inputs for selected items --}}
+    @foreach($selectedItemIds as $itemId)
+        <input type="hidden" name="selected_items[]" value="{{ $itemId }}">
+    @endforeach
+    
     <div class="row">
         <div class="col-md-8">
             <div class="card mb-4">
@@ -18,10 +24,12 @@
                         <textarea class="form-control" id="shipping_address" name="shipping_address" rows="3" required>{{ auth()->user()->shipping_address ?? old('shipping_address') }}</textarea>
                         <small class="form-text text-muted">Use the map below to pick your address</small>
                     </div>
+                    <input type="hidden" id="shipping_latitude" name="shipping_latitude" value="{{ old('shipping_latitude') }}">
+                    <input type="hidden" id="shipping_longitude" name="shipping_longitude" value="{{ old('shipping_longitude') }}">
                     <div class="mt-3">
                         <label class="form-label">Payment Method</label>
                         <div>
-                            <input type="radio" id="gcash" name="payment_method" value="gcash" {{ old('payment_method') == 'gcash' ? 'checked' : '' }} required>
+                            <input type="radio" id="gcash" name="payment_method" value="gcash" {{ old('payment_method') == 'gcash' ? 'checked' : 'checked' }} required>
                             <label for="gcash">GCash</label>
                         </div>
                         <div>
@@ -38,24 +46,48 @@
                     <h5>Order Summary</h5>
                 </div>
                 <div class="card-body">
-                    @foreach($cartItems as $item)
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>{{ $item->product->name }} x{{ $item->quantity }}</span>
-                        <span>₱{{ number_format($item->product->price * $item->quantity, 2) }}</span>
-                    </div>
-                    @endforeach
+                    @if(isset($itemsBySeller))
+                        @foreach($itemsBySeller as $sellerId => $sellerItems)
+                            <div class="mb-3 pb-3 border-bottom">
+                                <small class="text-muted d-block mb-2">
+                                    <strong>Seller:</strong> {{ $sellerItems->first()->product->seller->business_name ?? 'Unknown Seller' }}
+                                </small>
+                                @foreach($sellerItems as $item)
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="small">{{ $item->product->name }} x{{ $item->quantity }}</span>
+                                    <span class="small">₱{{ number_format($item->product->price * $item->quantity, 2) }}</span>
+                                </div>
+                                @endforeach
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-muted">Subtotal:</small>
+                                    <small class="fw-semibold">₱{{ number_format($sellerItems->sum(function($item) { return $item->product->price * $item->quantity; }), 2) }}</small>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        @foreach($cartItems as $item)
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{{ $item->product->name }} x{{ $item->quantity }}</span>
+                            <span>₱{{ number_format($item->product->price * $item->quantity, 2) }}</span>
+                        </div>
+                        @endforeach
+                    @endif
                     <hr>
                     <div class="d-flex justify-content-between">
                         <strong>Total:</strong>
                         <strong>₱{{ number_format($total, 2) }}</strong>
                     </div>
+                    @if(isset($itemsBySeller) && $itemsBySeller->count() > 1)
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-info-circle"></i> This checkout will create {{ $itemsBySeller->count() }} separate orders (one per seller).
+                        </small>
+                    @endif
                     <button type="submit" class="btn btn-primary w-100 mt-3">Place Order</button>
                 </div>
             </div>
         </div>
     </div>
 </form>
-</div>
 <script>
     let map;
     let marker;

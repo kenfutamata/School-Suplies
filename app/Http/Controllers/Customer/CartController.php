@@ -40,11 +40,23 @@ class CartController extends Controller
 
     public function update(Request $request, CartItem $cartItem)
     {
+        if ($cartItem->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $request->validate([
             'quantity' => 'required|integer|min:1|max:' . $cartItem->product->stock,
         ]);
 
         $cartItem->update(['quantity' => $request->quantity]);
+
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart updated',
+                'item' => $cartItem->load('product')
+            ]);
+        }
 
         return redirect()->route('customer.cart.index')->with('success', 'Cart updated');
     }

@@ -18,17 +18,21 @@ class DashboardController extends Controller
         $seller = auth()->user()->seller;
 
         $totalProducts = $seller->products()->count();
-        $pendingOrders = Order::whereHas('items.product', function ($query) use ($seller) {
-            $query->where('seller_id', $seller->id);
-        })->where('status', 'pending')->count();
+        
+        // Get orders that belong to this seller (using seller_id)
+        $pendingOrders = Order::where('seller_id', $seller->id)
+            ->where('status', 'pending')
+            ->count();
 
-        $totalRevenue = Order::whereHas('items.product', function ($query) use ($seller) {
-            $query->where('seller_id', $seller->id);
-        })->where('status', 'Delivered')->sum('total_amount');
+        $totalRevenue = Order::where('seller_id', $seller->id)
+            ->where('status', 'delivered')
+            ->sum('total_amount');
 
-        $recentOrders = Order::whereHas('items.product', function ($query) use ($seller) {
-            $query->where('seller_id', $seller->id);
-        })->with(['items.product', 'user'])->latest()->take(5)->get();
+        $recentOrders = Order::where('seller_id', $seller->id)
+            ->with(['items.product', 'user'])
+            ->latest()
+            ->take(5)
+            ->get();
 
         return view('seller.dashboard', compact(
             'seller',

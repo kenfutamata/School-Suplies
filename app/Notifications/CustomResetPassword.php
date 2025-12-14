@@ -53,7 +53,7 @@ class CustomResetPassword extends Notification
             ->action('Reset Password', $url)
             ->line('Mawagtang ni sud sa  10 minutes.')
             ->line('If you did not request a password reset, no further action is required.')
-            ->salutation('Regards, Penales School Supplies');
+            ->salutation('School Supplies Backup');
     }
 
     /**

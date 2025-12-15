@@ -54,4 +54,23 @@ class sendOrderDetailsMail extends Mailable
     {
         return [];
     }
+
+    // ------------------------------------------------
+    // USAGE NOTE: To send this email to the customer's email dynamically,
+    // use the following wherever you handle orders (e.g., in your controller):
+    //
+    // $maildata = [
+    //     'order_number' => $order->order_number,
+    //     'customer_name' => $order->customer_name,
+    //     'items' => $order->items,
+    //     'total' => $order->total_price,
+    // ];
+    //
+    // Mail::to($order->customer_email)->send(new sendOrderDetailsMail($maildata));
+    //
+    // Optionally, you can CC or BCC yourself/admin:
+    // Mail::to($order->customer_email)
+    //     ->cc('halolucas61@gmail.com')
+    //     ->send(new sendOrderDetailsMail($maildata));
+    // ------------------------------------------------
 }

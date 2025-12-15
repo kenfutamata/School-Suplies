@@ -46,11 +46,11 @@
                                         <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
                                             <div class="d-inline-flex align-items-center gap-2">
                                                 <label class="text-uppercase small text-muted mb-0">Qty</label>
-                                                <input type="number" 
-                                                    class="form-control quantity-input" 
-                                                    style="width: 90px;" 
-                                                    value="{{ $item->quantity }}" 
-                                                    min="1" 
+                                                <input type="number"
+                                                    class="form-control quantity-input"
+                                                    style="width: 90px;"
+                                                    value="{{ $item->quantity }}"
+                                                    min="1"
                                                     max="{{ $item->product->stock }}"
                                                     data-item-id="{{ $item->id }}"
                                                     data-update-url="{{ route('customer.cart.update', $item) }}"
@@ -167,10 +167,10 @@
             updateOrderSummary();
 
             // Send AJAX request to update quantity
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                             document.querySelector('input[name="_token"]')?.value || 
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                             document.querySelector('input[name="_token"]')?.value ||
                              '{{ csrf_token() }}';
-            
+
             fetch(updateUrl, {
                 method: 'POST',
                 headers: {
@@ -179,7 +179,7 @@
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     quantity: quantity,
                     _method: 'PUT'
                 })
@@ -202,25 +202,25 @@
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             updateOrderSummary();
-            
+
             // Handle checkout button click - navigate directly to avoid form submission issues
             const checkoutBtn = document.getElementById('checkoutBtn');
             if (checkoutBtn) {
                 checkoutBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    
+
                     const checkedItems = document.querySelectorAll('.cart-item-checkbox:checked');
                     if (checkedItems.length === 0) {
                         alert('Please select at least one item to checkout.');
                         return false;
                     }
-                    
+
                     // Build query string with selected items
                     const selectedIds = Array.from(checkedItems).map(cb => cb.value);
                     const queryString = selectedIds.map(id => `selected_items[]=${encodeURIComponent(id)}`).join('&');
                     const checkoutUrl = '{{ route("customer.checkout.index") }}?' + queryString;
-                    
+
                     // Navigate to checkout
                     window.location.href = checkoutUrl;
                 });

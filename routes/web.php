@@ -90,5 +90,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
+// Add this line after your existing home route
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/stock-status/{product}', [HomeController::class, 'getStockStatus'])->name('stock.status'); // Add this line
 require __DIR__.'/auth.php';
